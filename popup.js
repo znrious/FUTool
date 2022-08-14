@@ -49,16 +49,8 @@ function secondWindowScript() {
   let fucanvas = document.querySelector('canvas')
   chrome.runtime.onMessage.addListener(
     function(request) {
-      console.log(request)
-      console.log(request.message.key)
       if(Array.isArray(request.message.key)) {
-        request.message.key.forEach(key => {
-          console.log(key)
-          fucanvas.dispatchEvent(genKeyBoardEvent('keydown', key))
-          setTimeout(() => {
-            fucanvas.dispatchEvent(genKeyBoardEvent('keyup', key))
-          }, 50)
-        })
+        pressKeys(request.message.key)
       }else {
         fucanvas.dispatchEvent(genKeyBoardEvent('keydown', request.message.key))
         setTimeout(() => {
@@ -67,6 +59,20 @@ function secondWindowScript() {
       }
       function genKeyBoardEvent(type, data) {
         return new KeyboardEvent(type, { key: data })
+      }
+      function pressKeys(keys) {
+        let index = 0
+        let pressTask = setInterval(() => {
+          if(keys[index]) {
+            fucanvas.dispatchEvent(genKeyBoardEvent('keydown', keys[index]))
+            setTimeout(() => {
+              fucanvas.dispatchEvent(genKeyBoardEvent('keyup', keys[index]))
+            }, 50)
+            index ++
+          }else {
+            clearInterval(pressTask)
+          }
+        }, 2000)
       }
     }
   );
